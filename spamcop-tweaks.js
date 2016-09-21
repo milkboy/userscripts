@@ -1,13 +1,13 @@
 // ==UserScript==
-// @name         Spamcop tweaks
-// @namespace    http://wikberg.fi/userscript/spamcop
-// @version      0.1
-// @description  Add functionality to Spamcop reporting page
-// @author       Michael Wikberg
-// @include      /^https://www.spamcop.net/sc\?id.*/
-// @grant        unsafeWindow
-// @copyright			2016 Michael Wikberg \u003Cscripts@wikberg.fi>
-// @license				GPLv3
+// @name            Spamcop tweaks
+// @namespace       http://wikberg.fi/userscript/spamcop
+// @version         0.1
+// @description     Add functionality to Spamcop reporting page
+// @author          Michael Wikberg
+// @include         /^https://www.spamcop.net/sc\?id.*/
+// @grant           unsafeWindow
+// @copyright       2016 Michael Wikberg \u003Cscripts@wikberg.fi>
+// @license         GPLv3
 // ==/UserScript==
 
 // Add jQuery
@@ -92,29 +92,43 @@ function run () {
                 }
 
                 console.log(source + ": " + $("[name='master"+asd.data+"']").val() + " changed. ");
-                //console.log($(this));
-                var pos = nosendto.indexOf($("[name='master"+asd.data+"']").val());
+
                 if($(this).prop('checked')) {
-                    console.log(source + ": Will be sending alerts");
-                    if(pos >= 0) {
-                        nosendto.splice(pos, 1);
-                    }
+                    doSendTo(source, nosendto, $("[name='master"+asd.data+"']").val());
                 } else {
-                    console.log(source + ": Will not be sending alerts");
-                    if(pos == -1) {
-                        nosendto.push($("[name='master"+asd.data+"']").val());
-                    }
-                }
-                switch(source) {
-                    case 'source':
-                        localStorage.setItem('nosendtosrc', JSON.stringify(nosendto));
-                        break;
-                    case 'www':
-                        localStorage.setItem('nosendtoweb', JSON.stringify(nosendto));
-                        break;
+                    dontSendTo(source, nosendto, $("[name='master"+asd.data+"']").val());
                 }
             });
         }
     });
 
+    function doSendTo(source, nosendto, address) {
+        var pos = nosendto.indexOf(address);
+        console.log(source + ": Will be sending alerts to " + address);
+        if(pos >= 0) {
+            nosendto.splice(pos, 1);
+        }
+        save(source, nosendto);
+    }
+
+    function dontSendTo(source, nosendto, address) {
+        var pos = nosendto.indexOf(address);
+        console.log(source + ": Will not be sending alerts to " + address);
+        if(pos == -1) {
+            nosendto.push(address);
+        }
+        save(source, nosendto);
+    }
+
+    function save(source, nosendto) {
+        console.log("Saving " + source + " data");
+        switch(source) {
+            case 'source':
+                localStorage.setItem('nosendtosrc', JSON.stringify(nosendto));
+                break;
+            case 'www':
+                localStorage.setItem('nosendtoweb', JSON.stringify(nosendto));
+                break;
+        }
+    }
 }
