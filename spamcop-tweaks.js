@@ -8,6 +8,7 @@
 // @grant           unsafeWindow
 // @copyright       2016 Michael Wikberg \u003Cscripts@wikberg.fi>
 // @license         GPLv3
+// @updateURL       https://github.com/milkboy/userscripts/raw/master/spamcop-tweaks.js
 // ==/UserScript==
 
 // Add jQuery
