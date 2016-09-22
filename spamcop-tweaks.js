@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Spamcop tweaks
 // @namespace       http://wikberg.fi/userscript/spamcop
-// @version         0.1
+// @version         0.2
 // @description     Add functionality to Spamcop reporting page
 // @author          Michael Wikberg
 // @include         /^https://www.spamcop.net/sc\?id.*/
