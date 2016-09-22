@@ -37,11 +37,16 @@ function run () {
     var $ = jQuery;
     var loop = 0;
 
-    var nosendto, nosendtosrc, nosendtoweb, source;
+    var nosendto, nosendtosrc, nosendtoisrc, nosendtoweb, source;
 
     //we have some data?
     if(typeof localStorage.getItem('nosendtosrc') === 'undefined' || localStorage.getItem('nosendtosrc') === null) {
         nosendtosrc = [];
+    } else {
+        nosendtosrc = JSON.parse(localStorage.getItem('nosendtosrc'));
+    }
+    if(typeof localStorage.getItem('nosendtoisrc') === 'undefined' || localStorage.getItem('nosendtoisrc') === null) {
+        nosendtoisrc = [];
     } else {
         nosendtosrc = JSON.parse(localStorage.getItem('nosendtosrc'));
     }
@@ -52,6 +57,7 @@ function run () {
     }
 
     console.log("Don't send to sources: " + JSON.stringify(nosendtosrc));
+    console.log("Don't send to third party sources: " + JSON.stringify(nosendtoisrc));
     console.log("Don't send to www: " + JSON.stringify(nosendtoweb));
 
     //FIXME: use hidden field instead in selector to get the addresses directly
@@ -62,16 +68,8 @@ function run () {
             source = $("[name='type" + loop + "']").val();
 
             console.log("Source is: " + source);
-            switch(source) {
-                case 'source':
-                    nosendto = nosendtosrc;
-                    break;
-                case 'www':
-                    nosendto = nosendtoweb;
-                    break;
-                default:
-                    alert("Unknown type: " + $("[name='type" + loop + "']").val());
-            }
+            
+            nosendto = getList(source);
 
             if($.inArray($(this).text(), nosendto) >= 0) {
                 //Uncheck
@@ -83,14 +81,7 @@ function run () {
             $("[name='send" + loop + "']").change(loop, function(asd) {
 
                 source = $("[name='type" + asd.data + "']").val();
-                switch(source) {
-                    case 'source':
-                        nosendto = nosendtosrc;
-                        break;
-                    case 'www':
-                        nosendto = nosendtoweb;
-                        break;
-                }
+                nosendto = getList(source);
 
                 console.log(source + ": " + $("[name='master"+asd.data+"']").val() + " changed. ");
 
@@ -102,6 +93,20 @@ function run () {
             });
         }
     });
+    
+    function getList(source) {
+        switch(source) {
+            case 'i-source':
+                return nosendtoisrc;
+            case 'source':
+                return nosendtosrc;
+            case 'www':
+                return nosendtoweb;
+            default:
+                alert("Unknown type: " + $("[name='type" + loop + "']").val());
+                return [];
+        }
+    }
 
     function doSendTo(source, nosendto, address) {
         var pos = nosendto.indexOf(address);
@@ -126,6 +131,9 @@ function run () {
         switch(source) {
             case 'source':
                 localStorage.setItem('nosendtosrc', JSON.stringify(nosendto));
+                break;
+            case 'i-source':
+                localStorage.setItem('nosendtoisrc', JSON.stringify(nosendto));
                 break;
             case 'www':
                 localStorage.setItem('nosendtoweb', JSON.stringify(nosendto));
