@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Spamcop tweaks
 // @namespace       http://wikberg.fi/userscript/spamcop
-// @version         0.3
+// @version         0.4
 // @description     Add functionality to Spamcop reporting page
 // @author          Michael Wikberg
 // @include         /^https://www.spamcop.net/sc\?id.*/
@@ -65,9 +65,14 @@ function run () {
         nosendto = getList(source);
 
         if($.inArray($(this).val(), nosendto) >= 0) {
-            //Uncheck
-            console.log("Not sending to " + $(this).val());
-            $("[name^='send']", $(this).parent()).prop('checked', false);
+            if($("input[name^='master']").length <= 1 && source == 'source') {
+                //Only 0-1 recipient(s). don't uncheck
+                console.log("Less than 2 recipients, not unchecking " + $(this).val());
+            } else {
+                //Uncheck
+                console.log("Not sending to " + $(this).val());
+                $("[name^='send']", $(this).parent()).prop('checked', false);
+            }
         }
 
 
