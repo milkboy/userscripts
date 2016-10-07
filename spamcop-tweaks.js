@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Spamcop tweaks
 // @namespace       http://wikberg.fi/userscript/spamcop
-// @version         0.4
+// @version         0.5
 // @description     Add functionality to Spamcop reporting page
 // @author          Michael Wikberg
 // @include         /^https://www.spamcop.net/sc\?id.*/
@@ -59,6 +59,7 @@ function run () {
     console.log("Don't send to www: " + JSON.stringify(nosendtoweb));
 
     $("input[name^='master']").each(function(index) {
+        var runningNumberRe = /[a-z]*(\d+)/;
         source = $("[name^='type']", $(this).parent()).val();
         console.log('Found email address for ' + source + ': ' + $(this).val());
 
@@ -70,8 +71,9 @@ function run () {
                 console.log("Less than 2 recipients, not unchecking " + $(this).val());
             } else {
                 //Uncheck
+                var num = $(this).attr("name").match(runningNumberRe)[1];
                 console.log("Not sending to " + $(this).val());
-                $("[name^='send']", $(this).parent()).prop('checked', false);
+                $("[name='send" + num + "']", $(this).parent()).prop('checked', false);
             }
         }
 
