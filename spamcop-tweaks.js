@@ -4,7 +4,7 @@
 // @version         0.5
 // @description     Add functionality to Spamcop reporting page
 // @author          Michael Wikberg
-// @include         /^https://www.spamcop.net/sc\?id.*/
+// @include         /^https://www.spamcop.net/(sc(\?id.*)?)?$/
 // @grant           unsafeWindow
 // @copyright       2016 Michael Wikberg \u003Cscripts@wikberg.fi>
 // @license         GPLv3
@@ -30,12 +30,31 @@ JQueryScript.setAttribute("src", "https://ajax.googleapis.com/ajax/libs/jquery/1
 JQueryScript.setAttribute("type", "text/javascript");
 document.body.appendChild(JQueryScript);
 
+function run() {
+    var url = '' + window.location;
+    //alert(window.location);
+    if(url.match(/^https:\/\/www\.spamcop\.net\/sc\?id.*$/)) {
+        runSend();
+    }
+    else {
+        runAutoadvance();
+    }
+}
 
-function run () {
+function runAutoadvance() {
+    $("a").each(function() {
+        if($(this).attr('href').match(/sc\?id=.*/)) {
+            window.location.href = $(this).attr('href');
+        }
+    });
+    console.log($("a[val='Report now']").attr('href'));
+}
+
+function runSend () {
     'use strict';
 
     var $ = jQuery;
-    var nosendto, nosendtosrc, nosendtoisrc, nosendtoweb, source;
+    var nosendto, nosendtosrc, nosendtoisrc, nosendtoweb, nosendtoiweb, source;
 
     //we have some data?
     if(typeof localStorage.getItem('nosendtosrc') === 'undefined' || localStorage.getItem('nosendtosrc') === null) {
@@ -53,10 +72,16 @@ function run () {
     } else {
         nosendtoweb = JSON.parse(localStorage.getItem('nosendtoweb'));
     }
+    if(typeof localStorage.getItem('nosendtoiweb') === 'undefined' || localStorage.getItem('nosendtoiweb') === null) {
+        nosendtoiweb = [];
+    } else {
+        nosendtoiweb = JSON.parse(localStorage.getItem('nosendtoiweb'));
+    }
 
     console.log("Don't send to sources: " + JSON.stringify(nosendtosrc));
-    console.log("Don't send to third party sources: " + JSON.stringify(nosendtoisrc));
+    console.log("Don't send to third party source: " + JSON.stringify(nosendtoisrc));
     console.log("Don't send to www: " + JSON.stringify(nosendtoweb));
+    console.log("Don't send to third party web: " + JSON.stringify(nosendtoisrc));
 
     $("input[name^='master']").each(function(index) {
         var runningNumberRe = /[a-z]*(\d+)/;
@@ -72,6 +97,7 @@ function run () {
             } else {
                 //Uncheck
                 var num = $(this).attr("name").match(runningNumberRe)[1];
+                console.log($(this).attr("name"));
                 console.log("Not sending to " + $(this).val());
                 $("[name='send" + num + "']", $(this).parent()).prop('checked', false);
             }
@@ -102,6 +128,8 @@ function run () {
                 return nosendtosrc;
             case 'www':
                 return nosendtoweb;
+            case 'i-www':
+                return nosendtoiweb;
             default:
                 alert("Unknown type: " + source);
                 return [];
@@ -137,6 +165,9 @@ function run () {
                 break;
             case 'www':
                 localStorage.setItem('nosendtoweb', JSON.stringify(nosendto));
+                break;
+            case 'i-www':
+                localStorage.setItem('nosendtoiweb', JSON.stringify(nosendto));
                 break;
         }
     }
