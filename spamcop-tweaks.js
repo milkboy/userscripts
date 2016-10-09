@@ -32,7 +32,6 @@ document.body.appendChild(JQueryScript);
 
 function run() {
     var url = '' + window.location;
-    //alert(window.location);
     if(url.match(/^https:\/\/www\.spamcop\.net\/sc\?id.*$/)) {
         runSend();
     }
@@ -47,7 +46,6 @@ function runAutoadvance() {
             window.location.href = $(this).attr('href');
         }
     });
-    console.log($("a[val='Report now']").attr('href'));
 }
 
 function runSend () {
