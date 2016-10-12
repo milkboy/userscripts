@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Spamcop tweaks
 // @namespace       http://wikberg.fi/userscript/spamcop
-// @version         0.5
+// @version         0.6
 // @description     Add functionality to Spamcop reporting page
 // @author          Michael Wikberg
 // @include         /^https://www.spamcop.net/(sc(\?id.*)?)?$/
@@ -43,6 +43,11 @@ function run() {
 function runAutoadvance() {
     $("a").each(function() {
         if($(this).attr('href').match(/sc\?id=.*/)) {
+            $(this).click(function(e) {
+                e.preventDefault();
+            });
+            $(this).css('color', 'red');
+            $(this).text('Loading');
             window.location.href = $(this).attr('href');
         }
     });
@@ -53,6 +58,7 @@ function runSend () {
 
     var $ = jQuery;
     var nosendto, nosendtosrc, nosendtoisrc, nosendtoweb, nosendtoiweb, source;
+    var runningNumberRe = /[a-z]*(\d+)/;
 
     //we have some data?
     if(typeof localStorage.getItem('nosendtosrc') === 'undefined' || localStorage.getItem('nosendtosrc') === null) {
@@ -63,7 +69,7 @@ function runSend () {
     if(typeof localStorage.getItem('nosendtoisrc') === 'undefined' || localStorage.getItem('nosendtoisrc') === null) {
         nosendtoisrc = [];
     } else {
-        nosendtoisrc = JSON.parse(localStorage.getItem('nosendtosrc'));
+        nosendtoisrc = JSON.parse(localStorage.getItem('nosendtoisrc'));
     }
     if(typeof localStorage.getItem('nosendtoweb') === 'undefined' || localStorage.getItem('nosendtoweb') === null) {
         nosendtoweb = [];
@@ -82,7 +88,6 @@ function runSend () {
     console.log("Don't send to third party web: " + JSON.stringify(nosendtoisrc));
 
     $("input[name^='master']").each(function(index) {
-        var runningNumberRe = /[a-z]*(\d+)/;
         source = $("[name^='type']", $(this).parent()).val();
         console.log('Found email address for ' + source + ': ' + $(this).val());
 
@@ -100,23 +105,22 @@ function runSend () {
                 $("[name='send" + num + "']", $(this).parent()).prop('checked', false);
             }
         }
-
-
-        $("[name^='send']", $(this).parent()).change(function(asd) {
-            var par = $(this).parent();
-            source = $("[name^='type']", par).val();
-            nosendto = getList(source);
-
-            console.log(source + ": " + $("[name^='master']", par).val() + " changed. ");
-
-            if($(this).prop('checked')) {
-                doSendTo(source, nosendto, $("[name^='master']", par).val());
-            } else {
-                dontSendTo(source, nosendto, $("[name^='master']", par).val());
-            }
-        });
     });
-    
+
+    $("[name^='send'] [type='checkbox']").change(function(asd) {
+        var num = $(this).attr("name").match(runningNumberRe)[1];
+        source = $("[name='type" + num + "']").val();
+        nosendto = getList(source);
+
+        console.log(source + ": " + $("[name='master" + num + "']").val() + " changed. ");
+
+        if($(this).prop('checked')) {
+            doSendTo(source, nosendto, $("[name='master" + num + "']").val());
+        } else {
+            dontSendTo(source, nosendto, $("[name='master" + num + "']").val());
+        }
+    });
+
     function getList(source) {
         console.log("Getting list for " + source);
         switch(source) {
