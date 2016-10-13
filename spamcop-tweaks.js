@@ -57,7 +57,7 @@ function runSend () {
     'use strict';
 
     var $ = jQuery;
-    var nosendto, nosendtosrc, nosendtoisrc, nosendtoweb, nosendtoiweb, source;
+    var nosendto, nosendtosrc, nosendtoisrc, nosendtoweb, nosendtoiweb, nosendtointermediary, source;
     var runningNumberRe = /[a-z]*(\d+)/;
 
     //we have some data?
@@ -82,10 +82,17 @@ function runSend () {
         nosendtoiweb = JSON.parse(localStorage.getItem('nosendtoiweb'));
     }
 
+    if(typeof localStorage.getItem('nosendtointermediary') === 'undefined' || localStorage.getItem('nosendtointermediary') === null) {
+        nosendtointermediary = [];
+    } else {
+        nosendtointermediary = JSON.parse(localStorage.getItem('nosendtointermediary'));
+    }
+
     console.log("Don't send to sources: " + JSON.stringify(nosendtosrc));
     console.log("Don't send to third party source: " + JSON.stringify(nosendtoisrc));
     console.log("Don't send to www: " + JSON.stringify(nosendtoweb));
     console.log("Don't send to third party web: " + JSON.stringify(nosendtoisrc));
+    console.log("Don't send to intermediary parties: " + JSON.stringify(nosendtointermediary));
 
     $("input[name^='master']").each(function(index) {
         source = $("[name^='type']", $(this).parent()).val();
@@ -132,6 +139,8 @@ function runSend () {
                 return nosendtoweb;
             case 'i-www':
                 return nosendtoiweb;
+            case 'intermediary':
+                return nosendtointermediary;
             default:
                 alert("Unknown type: " + source);
                 return [];
@@ -170,6 +179,9 @@ function runSend () {
                 break;
             case 'i-www':
                 localStorage.setItem('nosendtoiweb', JSON.stringify(nosendto));
+                break;
+            case 'intermediary':
+                localStorage.setItem('nosendtointermediary', JSON.stringify(nosendto));
                 break;
         }
     }
